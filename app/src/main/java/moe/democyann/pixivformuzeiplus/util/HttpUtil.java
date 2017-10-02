@@ -1,10 +1,15 @@
 package moe.democyann.pixivformuzeiplus.util;
 
+import android.content.pm.PackageManager;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.apps.muzei.api.RemoteMuzeiArtSource;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,37 +37,37 @@ public class HttpUtil {
     private char[] buffer;
     private Cookie cookie;
 
-    private String TAG="PixivHttpUtil";
+    private String TAG = "PixivHttpUtil";
 
-    public HttpUtil(String uri,Cookie cookie){
-        this.uri=uri;
-        this.cookie=cookie;
+    public HttpUtil(String uri, Cookie cookie) {
+        this.uri = uri;
+        this.cookie = cookie;
     }
 
-    public String getData(Map<String,String> head){
-        try{
-            conn=(HttpURLConnection)url.openConnection();
+    public String getData(Map<String, String> head) {
+        try {
+            conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(10000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Cookie",cookie.toString());
-            for(String key:head.keySet()) {
-                conn.setRequestProperty(key,head.get(key));
+            conn.setRequestProperty("Cookie", cookie.toString());
+            for (String key : head.keySet()) {
+                conn.setRequestProperty(key, head.get(key));
             }
             conn.setDoInput(true);
             conn.connect();
 
             int status = conn.getResponseCode();
 
-           if (status != 200) {
+            if (status != 200) {
                 Log.w(TAG, "Response code: " + status);
-                Log.i(TAG, "getData: "+conn.getHeaderField("location"));
-                throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR "+status));
+                Log.i(TAG, "getData: " + conn.getHeaderField("location"));
+                throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR " + status));
             }
             Log.d(TAG, "Response code: " + status);
 
             List<String> set_cookie = conn.getHeaderFields().get("Set-Cookie");
-            if(set_cookie!=null) {
+            if (set_cookie != null) {
                 for (String str : set_cookie) {
                     String ci = str.substring(0, str.indexOf(";"));
                     cookie.add(ci);
@@ -72,26 +77,26 @@ public class HttpUtil {
 
             try {
                 inputStream = conn.getInputStream();
-                inputStreamReader= new InputStreamReader(inputStream);
+                inputStreamReader = new InputStreamReader(inputStream);
                 int read;
-                if("gzip".equals(conn.getContentEncoding())){
-                    GZIPInputStream gzip= new GZIPInputStream(inputStream);
-                    inputStreamReader=new InputStreamReader(gzip);
+                if ("gzip".equals(conn.getContentEncoding())) {
+                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                    inputStreamReader = new InputStreamReader(gzip);
                 }
                 buffer = new char[1024];
                 while ((read = inputStreamReader.read(buffer)) != -1) {
                     restring += String.valueOf(buffer, 0, read);
                 }
-            }finally {
-                try{
+            } finally {
+                try {
                     inputStream.close();
-                }catch (final IOException e) {
+                } catch (final IOException e) {
                     Log.e(TAG, e.toString(), e);
                     throw new RemoteMuzeiArtSource.RetryException(e);
                 }
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, e.toString(), e);
             return "ERROR";
         }
@@ -99,26 +104,26 @@ public class HttpUtil {
         return restring;
     }
 
-    public String postData(Map<String,String> head,String poststr){
-        try{
-            conn=(HttpURLConnection)url.openConnection();
+    public String postData(Map<String, String> head, String poststr) {
+        try {
+            conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(10000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Cookie",cookie.toString());
-            for(String key:head.keySet()) {
-                conn.setRequestProperty(key,head.get(key));
+            conn.setRequestProperty("Cookie", cookie.toString());
+            for (String key : head.keySet()) {
+                conn.setRequestProperty(key, head.get(key));
             }
             conn.setDoInput(true);
             conn.setDoOutput(true);
-            try{
-                outputStream=conn.getOutputStream();
+            try {
+                outputStream = conn.getOutputStream();
                 outputStream.write(poststr.getBytes());
-            }finally {
-                try{
+            } finally {
+                try {
                     outputStream.flush();
                     outputStream.close();
-                }catch(Exception e) {
+                } catch (Exception e) {
                     Log.e(TAG, e.toString(), e);
                     return "ERROR";
                 }
@@ -131,43 +136,43 @@ public class HttpUtil {
 
             if (status != 200) {
                 Log.w(TAG, "Response code: " + status);
-                throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR "+status));
+                throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR " + status));
             }
             Log.d(TAG, "Response code: " + status);
 
             List<String> set_cookie = conn.getHeaderFields().get("Set-Cookie");
 
-            if(set_cookie!=null) {
+            if (set_cookie != null) {
                 for (String str : set_cookie) {
                     String ci = str.substring(0, str.indexOf(";"));
                     cookie.add(ci);
                 }
             }
-            Log.i(TAG, "postData: COOKIE:"+cookie.toString());
+            Log.i(TAG, "postData: COOKIE:" + cookie.toString());
 
             try {
                 inputStream = conn.getInputStream();
-                inputStreamReader= new InputStreamReader(inputStream);
+                inputStreamReader = new InputStreamReader(inputStream);
                 int read;
-                if("gzip".equals(conn.getContentEncoding())){
-                    GZIPInputStream gzip= new GZIPInputStream(inputStream);
-                    inputStreamReader=new InputStreamReader(gzip);
+                if ("gzip".equals(conn.getContentEncoding())) {
+                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                    inputStreamReader = new InputStreamReader(gzip);
                 }
-                buffer=new char[1024];
-                while ((read=inputStreamReader.read(buffer)) != -1) {
-                    restring += String.valueOf(buffer,0,read);
+                buffer = new char[1024];
+                while ((read = inputStreamReader.read(buffer)) != -1) {
+                    restring += String.valueOf(buffer, 0, read);
 //                    buffer=new char[1024*10];
                 }
-            }finally {
-                try{
+            } finally {
+                try {
                     inputStream.close();
-                }catch (final IOException e) {
+                } catch (final IOException e) {
                     Log.e(TAG, e.toString(), e);
                     throw new RemoteMuzeiArtSource.RetryException(e);
                 }
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, e.toString(), e);
             return "ERROR";
         }
@@ -176,58 +181,95 @@ public class HttpUtil {
     }
 
 
-    public Cookie getCookie(){
+    public Cookie getCookie() {
         return cookie;
     }
 
-    public boolean checkURL(){
-        boolean flag=true;
+    public boolean checkURL() {
+        boolean flag = true;
         try {
             url = new URL(uri);
         } catch (MalformedURLException e) {
-            Log.e(TAG, e.toString(),e );
-            flag=false;
+            Log.e(TAG, e.toString(), e);
+            flag = false;
         }
         return flag;
     }
 
-    public boolean downloadImg(String referer,String USER_AGENT,File file){
-        try{
-            conn=(HttpURLConnection)url.openConnection();
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", USER_AGENT);
-            conn.setRequestProperty("Referer", referer);
-            conn.setDoInput(true);
-            conn.connect();
-            int status = conn.getResponseCode();
-            if(status!=200) {
-                Log.i(TAG, "downloadImg: ERROR");
-                return false;
-            }
-            FileOutputStream fileStream = new FileOutputStream(file);
-            inputStream=conn.getInputStream();
-            if("gzip".equals(conn.getContentEncoding())){
-                GZIPInputStream gzip = new GZIPInputStream(inputStream);
-                inputStream = gzip;
-            }
-            try{
-                byte[] buff=new byte[1024*50];
-                int read;
-                while((read=inputStream.read(buff))>0){
-                    fileStream.write(buff,0,read);
+
+    public boolean downloadImg(String referer, String USER_AGENT, File file) {
+        try {
+            // 创建外置缓存文件夹
+            File pPath = new File(Environment.getExternalStorageDirectory() + "/pixiv");
+            if (pPath.exists()) {
+                if (pPath.isFile()) {
+                    pPath.delete();
+                    pPath.mkdir();
                 }
-            }finally {
+            } else {
+                pPath.mkdir();
+            }
+
+            FileOutputStream fileStream = new FileOutputStream(file);
+
+            String[] split = url.getFile().split("/");
+            String fileName = split[split.length - 1];
+            File newFile = new File(Environment.getExternalStorageDirectory() + "/pixiv/" + fileName);
+            if (newFile.exists()) {
+                inputStream = new FileInputStream(newFile);
+            } else {
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent", USER_AGENT);
+                conn.setRequestProperty("Referer", referer);
+                conn.setDoInput(true);
+                conn.connect();
+                int status = conn.getResponseCode();
+                if (status != 200) {
+                    Log.i(TAG, "downloadImg: ERROR");
+                    return false;
+                }
+                inputStream = conn.getInputStream();
+                if ("gzip".equals(conn.getContentEncoding())) {
+                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                    inputStream = gzip;
+                }
+            }
+
+            try {
+                byte[] buff = new byte[1024 * 50];
+                int read;
+                while ((read = inputStream.read(buff)) > 0) {
+                    fileStream.write(buff, 0, read);
+                }
+            } finally {
                 fileStream.close();
-                try{
+                try {
                     inputStream.close();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.e(TAG, e.toString(), e);
                     return false;
                 }
             }
-        } catch (Exception e){
+
+            if (!newFile.exists()) {
+                FileOutputStream newFileStream = new FileOutputStream(newFile);
+                FileInputStream oldInputStream = new FileInputStream(file);
+                try {
+                    byte[] buff = new byte[1024 * 50];
+                    int read;
+                    while ((read = oldInputStream.read(buff)) > 0) {
+                        newFileStream.write(buff, 0, read);
+                    }
+                } finally {
+                    newFileStream.close();
+                    oldInputStream.close();
+                }
+            }
+
+        } catch (Exception e) {
             Log.e(TAG, e.toString(), e);
             return false;
         }

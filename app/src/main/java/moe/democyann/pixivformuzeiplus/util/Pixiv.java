@@ -427,6 +427,7 @@ public class Pixiv {
             JSONArray arr = new JSONArray(restring);
             return arr.getJSONObject(0);
         } catch (JSONException e) {
+            Log.d(TAG, restring);
             Log.e(TAG, e.toString(), e);
             error = "1034";
             return null;
@@ -551,18 +552,27 @@ public class Pixiv {
      * @return 图片文件 Uri
      */
     public Uri downloadImage(String imgurl, String workid, File file, boolean x) {
+        // 略缩：https://i.pximg.net/c/150x150/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
+        // 高清：https://i.pximg.net/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
+        // 原图：https://i.pximg.net/img-original/img/2016/11/05/21/07/57/59813504_p0.png
+        // 或者：https://i.pximg.net/img-original/img/2010/08/30/00/32/39/12904418_p0.jpg
+        Log.d(TAG, imgurl);
         String smail = imgurl;
         String ref = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + workid;
-
 
         String big = smail;
 
         if (x) {
-            pattern = Pattern.compile("/c/[0-9]+x[0-9]+/img-master");
-            matcher = pattern.matcher(imgurl);
-            if (matcher.find()) {
-                big = matcher.replaceFirst("/img-master");
-            }
+            big = Pattern.compile("/c/[0-9]+x[0-9]+/img-master").matcher(imgurl).replaceFirst("/img-original");
+            Log.d(TAG, big);
+            big = Pattern.compile("\\_master[0-9]+\\.jpg").matcher(big).replaceFirst(".png");
+            Log.d(TAG, big);
+
+//            pattern = Pattern.compile("/c/[0-9]+x[0-9]+/img-master");
+//            matcher = pattern.matcher(imgurl);
+//            if (matcher.find()) {
+//                big = matcher.replaceFirst("/img-master");
+//            }
         }
 
         Log.i(TAG, "downloadImage: " + big);

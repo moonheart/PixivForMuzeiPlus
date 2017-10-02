@@ -1,13 +1,10 @@
 package moe.democyann.pixivformuzeiplus.util;
 
-import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.apps.muzei.api.RemoteMuzeiArtSource;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -200,8 +197,9 @@ public class HttpUtil {
 
     public boolean downloadImg(String referer, String USER_AGENT, File file) {
         try {
+            String savePath = "/pixiv/";
             // 创建外置缓存文件夹
-            File pPath = new File(Environment.getExternalStorageDirectory() + "/pixiv");
+            File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
             if (pPath.exists()) {
                 if (pPath.isFile()) {
                     pPath.delete();
@@ -215,21 +213,24 @@ public class HttpUtil {
 
             String[] split = url.getFile().split("/");
             String fileName = split[split.length - 1];
-            File newFile = new File(Environment.getExternalStorageDirectory() + "/pixiv/" + fileName);
+            File newFile = new File(Environment.getExternalStorageDirectory() + savePath + fileName);
             if (newFile.exists()) {
                 inputStream = new FileInputStream(newFile);
             } else {
                 conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("User-Agent", USER_AGENT);
-                conn.setRequestProperty("Referer", referer);
-                conn.setDoInput(true);
-                conn.connect();
+                setDownloadImgConn(conn, USER_AGENT, referer);
                 int status = conn.getResponseCode();
+                if(status == 404){
+                    conn.disconnect();
+                    url = new URL(url.toString().replace(".png",".jpg"));
+                    Log.d(TAG, "Replace PNG with JPG, " + url.toString());
+                    conn = (HttpURLConnection)url.openConnection();
+                    setDownloadImgConn(conn, USER_AGENT, referer);
+                    status = conn.getResponseCode();
+                }
+
                 if (status != 200) {
-                    Log.i(TAG, "downloadImg: ERROR");
+                    Log.i(TAG, "downloadImg: ERROR,code"+ status);
                     return false;
                 }
                 inputStream = conn.getInputStream();
@@ -238,7 +239,7 @@ public class HttpUtil {
                     inputStream = gzip;
                 }
             }
-
+            Log.d(TAG, "downloadImg finished.");
             try {
                 byte[] buff = new byte[1024 * 50];
                 int read;
@@ -275,5 +276,15 @@ public class HttpUtil {
             return false;
         }
         return true;
+    }
+
+    private void  setDownloadImgConn(HttpURLConnection conn, String USER_AGENT, String referer) throws IOException {
+        conn.setReadTimeout(10000);
+        conn.setConnectTimeout(15000);
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", USER_AGENT);
+        conn.setRequestProperty("Referer", referer);
+        conn.setDoInput(true);
+        conn.connect();
     }
 }

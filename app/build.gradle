@@ -26,6 +26,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
-    compile files('libs/muzei-api-2.0.jar')
-    compile files('libs/muzei-api-2.0-javadoc.jar')
+//    compile files('libs/muzei-api-2.0.jar')
+//    compile files('libs/muzei-api-2.0-javadoc.jar')
+    compile 'com.google.android.apps.muzei:muzei-api:+'
 }

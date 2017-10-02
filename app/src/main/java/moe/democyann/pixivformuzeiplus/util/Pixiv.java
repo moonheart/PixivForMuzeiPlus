@@ -337,13 +337,12 @@ public class Pixiv {
      * 使用触屏版网页解析收藏列表
      * @return
      */
-    public List getBooklistHtml() {
+    public List getBooklistHtml(Boolean isAll, Integer maxPage) {
         ArrayList list = new ArrayList();
         HttpUtil book;
-
-        for (int page = 1; page <= 10; page++) {
+        Integer page = 1;
+        while (isAll || page<=maxPage){
             String tempurl = String.format(BOOK_URL_WWW, userid, page);
-
             book = new HttpUtil(tempurl, cookie);
             book.checkURL();
 
@@ -362,9 +361,18 @@ public class Pixiv {
                 String id = element.attr("data-id");
                 list.add(Integer.parseInt(id));
             }
+            page++;
         }
-
         return list;
+    }
+    public List getBooklistHtml(Boolean isAll){
+        return getBooklistHtml(isAll, 10);
+    }
+    public List getBooklistHtml(Integer maxPage){
+        return getBooklistHtml(false, maxPage);
+    }
+    public List getBooklistHtml(){
+        return getBooklistHtml(false, 10);
     }
 
     /***

@@ -10,6 +10,7 @@ import com.google.android.apps.muzei.api.Artwork;
 import com.google.android.apps.muzei.api.RemoteMuzeiArtSource;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -59,14 +60,33 @@ public class PixivLike {
             e.printStackTrace();
         }
 
-        //列表为空，超时则重新获取
-        if(list==null||list.size()<=0||(System.currentTimeMillis()-last)>(60*MINUTE)){
-            list=pixiv.getBooklistHtml();
+        //列表为空重新获取
+        if(list == null || list.size() <= 0) {
+            list=pixiv.getBooklistHtml(true);
             last=System.currentTimeMillis();
             db.setInfo("last",String.valueOf(last));
-            Log.i(TAG, "listUpdate: Internet List Update");
+            Log.i(TAG, "listUpdate: Internet List Full Update");
             db.setInfo("likeList",conf.listToString(list));
         }
+        //超时，更新数据
+        else if( (System.currentTimeMillis() - last) > (60 * MINUTE)){
+            List booklistHtml = pixiv.getBooklistHtml(1);
+            if(booklistHtml != null && booklistHtml.size() >= 0){
+                //使用HashSet排除重复
+                HashSet<Integer> hashSet = new HashSet<>(list);
+                hashSet.addAll(booklistHtml);
+                list.clear();
+                list.addAll(hashSet);
+                last=System.currentTimeMillis();
+                db.setInfo("last",String.valueOf(last));
+                Log.i(TAG, "listUpdate: Internet List Delta Update");
+                db.setInfo("likeList",conf.listToString(list));
+            }
+            else{
+                Log.w(TAG, "listUpdate: Internet List Delta Update Failed");
+            }
+        }
+
     }
 
     public Artwork getArtwork()throws RemoteMuzeiArtSource.RetryException {

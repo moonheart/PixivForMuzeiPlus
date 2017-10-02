@@ -61,7 +61,7 @@ public class PixivLike {
 
         //列表为空，超时则重新获取
         if(list==null||list.size()<=0||(System.currentTimeMillis()-last)>(60*MINUTE)){
-            list=pixiv.getBooklist();
+            list=pixiv.getBooklistHtml();
             last=System.currentTimeMillis();
             db.setInfo("last",String.valueOf(last));
             Log.i(TAG, "listUpdate: Internet List Update");
@@ -125,7 +125,7 @@ public class PixivLike {
 
         Log.i(TAG, "getArtwork: List SIZE:"+list.size());
 
-        if(list.size()==0){
+        if (list == null || list.size() == 0) {
 
             Log.i(TAG, "getArtwork: TOKEN 过期重新获取");
             token=pixiv.getToken(conf.getUsername(),conf.getPassword(),false);

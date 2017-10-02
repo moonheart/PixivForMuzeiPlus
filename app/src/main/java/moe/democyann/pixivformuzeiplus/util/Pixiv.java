@@ -6,6 +6,9 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ public class Pixiv {
     private final String RALL_URL = "https://www.pixiv.net/ranking.php?mode=daily&content=illust&p=1&format=json";
 
     private final String BOOK_URL = "https://app-api.pixiv.net/v1/user/bookmarks/illust?restrict=public&user_id=";
+    private final String BOOK_URL_WWW = "https://www.pixiv.net/bookmark.php?id=%s&p=%s";
 
     private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
             + "Chrome/42.0.2311.152 Safari/537.36";
@@ -324,6 +328,40 @@ public class Pixiv {
                 return null;
             }
 
+        }
+
+        return list;
+    }
+
+    /**
+     * 使用触屏版网页解析收藏列表
+     * @return
+     */
+    public List getBooklistHtml() {
+        ArrayList list = new ArrayList();
+        HttpUtil book;
+
+        for (int page = 1; page <= 10; page++) {
+            String tempurl = String.format(BOOK_URL_WWW, userid, page);
+
+            book = new HttpUtil(tempurl, cookie);
+            book.checkURL();
+
+            Map<String, String> recprer = basepre;
+            recprer.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            restring = book.getData(recprer);
+            //Log.d(TAG, restring);
+            // 解析网页
+            Document document = Jsoup.parse(restring);
+            Elements select = document.select(".image-item img[data-id]");
+            Log.i(TAG, "HTML node count:" + select.size());
+            if(select.size()==0){
+                break;
+            }
+            for (org.jsoup.nodes.Element element:select) {
+                String id = element.attr("data-id");
+                list.add(Integer.parseInt(id));
+            }
         }
 
         return list;

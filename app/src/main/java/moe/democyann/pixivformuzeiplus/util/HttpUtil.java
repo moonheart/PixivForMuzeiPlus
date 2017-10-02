@@ -216,6 +216,7 @@ public class HttpUtil {
             File newFile = new File(Environment.getExternalStorageDirectory() + savePath + fileName);
             if (newFile.exists()) {
                 inputStream = new FileInputStream(newFile);
+                Log.d(TAG, "target image has been downloaded before.");
             } else {
                 conn = (HttpURLConnection) url.openConnection();
                 setDownloadImgConn(conn, USER_AGENT, referer);
@@ -239,7 +240,6 @@ public class HttpUtil {
                     inputStream = gzip;
                 }
             }
-            Log.d(TAG, "downloadImg finished.");
             try {
                 byte[] buff = new byte[1024 * 50];
                 int read;
@@ -255,6 +255,7 @@ public class HttpUtil {
                     return false;
                 }
             }
+            Log.d(TAG, "downloadImg finished.");
 
             if (!newFile.exists()) {
                 FileOutputStream newFileStream = new FileOutputStream(newFile);

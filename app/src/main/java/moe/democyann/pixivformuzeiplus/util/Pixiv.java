@@ -31,8 +31,10 @@ public class Pixiv {
     private final String INDEX_URL = "https://www.pixiv.net";
     private final String POST_KEY_URL = "https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index";
     private final String LOGIN_URL = "https://accounts.pixiv.net/api/login?lang=zh";
-    private final String RECOMM_URL = "https://www.pixiv.net/rpc/recommender.php?type=illust&sample_illusts=auto&num_recommendations=500&tt=";
+    private final String RECOMM_URL = "https://www.pixiv.net/rpc/recommender.php?type=illust&sample_illusts=auto&num_recommendations=500&page=discovery&tt=";
+    private final String RECOMM_URL_ANDROID = "https://app-api.pixiv.net/v1/illust/recommended?filter=for_android";
     private final String ILLUST_URL = "https://www.pixiv.net/rpc/illust_list.php?verbosity=&exclude_muted_illusts=1&illust_ids=";
+    private final String ILLUST_URL_TOUCH = "https://touch.pixiv.net/ajax_api/ajax_api.php?mode=illust_data&illusts=";
 
     private final String DETA_URL = "https://app-api.pixiv.net/v1/illust/detail?illust_id=";
 
@@ -232,6 +234,7 @@ public class Pixiv {
      * @return 推荐列表
      */
     public List getRcomm() {
+        Log.d(TAG, "getRcomm");
         List list = new ArrayList();
         Log.i(TAG, "getRcomm: TOKEN:" + token);
         Log.i(TAG, "getRcomm: COOKIE:" + cookie);
@@ -261,7 +264,36 @@ public class Pixiv {
         }
         return list;
     }
+    /***
+     * 获取推荐列表(Android)
+     * @return 推荐列表
+     */
+    public JSONArray getRcommAndroid() {
+        Log.d(TAG, "getRcommAndroid");
+        Log.i(TAG, "getRcomm: TOKEN:" + token);
+        Log.i(TAG, "getRcomm: COOKIE:" + cookie);
+        HttpUtil recomm = new HttpUtil(RECOMM_URL_ANDROID, cookie);
+        recomm.checkURL();
+        Map<String, String> recprer = basepre;
+        recprer.put("Authorization", "Bearer ");
+        //recprer.put("Accept", "application/json, text/javascript, */*; q=0.01");
+        restring = recomm.getData(recprer);
+        if (restring.equals("ERROR")) {
+            error = "1021";
+            return null;
+        }
 
+        try {
+            Log.i(TAG, restring);
+            JSONObject o = new JSONObject(restring);
+            JSONArray arr = o.getJSONArray("illusts");
+            return arr;
+        } catch (JSONException e) {
+            Log.e(TAG, e.toString(), e);
+            error = "1022";
+            return null;
+        }
+    }
 
     /***
      * 获取每日 TOP 50 列表
@@ -334,7 +366,7 @@ public class Pixiv {
     }
 
     /**
-     * 使用触屏版网页解析收藏列表
+     * 使用网页解析收藏列表
      * @return
      */
     public List getBooklistHtml(Boolean isAll, Integer maxPage) {
@@ -433,7 +465,36 @@ public class Pixiv {
             return null;
         }
     }
-
+    /***
+     * 获取作品信息方式3 TOUCH
+     * @param id 作品ID
+     * @return
+     */
+    private JSONObject getIllInfo3(String id) {
+        Log.i(TAG, "getIllInfo: " + token);
+        HttpUtil illust = new HttpUtil(ILLUST_URL_TOUCH + id + "&tt=" + token, cookie);
+        illust.checkURL();
+        Map<String, String> recprer = basepre;
+        recprer.put("Referer", "https://touch.pixiv.net/discovery");
+        recprer.put("Accept", "*/*");
+        recprer.put("X-Requested-With", "XMLHttpRequest");
+        restring = illust.getData(recprer);
+        if (restring.equals("ERROR")) {
+            error = "1033";
+            return null;
+        }
+        try {
+            //restring = restring.replaceFirst("null", "");
+            Log.i(TAG, restring);
+            JSONArray arr = new JSONArray(restring);
+            return arr.getJSONObject(0);
+        } catch (JSONException e) {
+            Log.d(TAG, restring);
+            Log.e(TAG, e.toString(), e);
+            error = "1034";
+            return null;
+        }
+    }
     /***
      * 获取作品信息方式
      * @param id 作品ID
@@ -526,6 +587,29 @@ public class Pixiv {
             e.printStackTrace();
             return null;
         }
+        //=================解析信息3=============
+//        JSONObject temp = getIllInfo3(id);
+//        if (temp == null) {
+//            return null;
+//        }
+//
+//        try {
+//
+//            user_id = temp.getString("illust_user_id");
+//            img_id = temp.getString("illust_id");
+//            img_url = temp.getString("url");
+//            user_name = temp.getString("user_name");
+//            img_name = temp.getString("illust_title");
+//            //tags = temp.getString("tags");
+//            img_height = temp.getInt("illust_height");
+//            img_width = temp.getInt("illust_width");
+//
+//        } catch (JSONException e) {
+//            error += ",1036";
+//            e.printStackTrace();
+//            return null;
+//        }
+
 
 
         o.setImg_id(img_id);

@@ -69,8 +69,10 @@ public class PixivLike {
             db.setInfo("likeList",conf.listToString(list));
         }
         //超时，更新数据
-        else if( (System.currentTimeMillis() - last) > (60 * MINUTE)){
-            List booklistHtml = pixiv.getBooklistHtml(1);
+        else if( (System.currentTimeMillis() - last) > (30 * MINUTE)){
+            // 每页收藏有20条数据
+            // 每半个小时更新5页 共100条
+            List booklistHtml = pixiv.getBooklistHtml(5);
             if(booklistHtml != null && booklistHtml.size() >= 0){
                 //使用HashSet排除重复
                 HashSet<Integer> hashSet = new HashSet<>(list);

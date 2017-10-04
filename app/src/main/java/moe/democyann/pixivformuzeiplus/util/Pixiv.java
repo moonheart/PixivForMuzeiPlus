@@ -272,6 +272,7 @@ public class Pixiv {
         Log.d(TAG, "getRcommAndroid");
         Log.i(TAG, "getRcomm: TOKEN:" + token);
         Log.i(TAG, "getRcomm: COOKIE:" + cookie);
+        //// TODO: 2017/10/04 这个方法不可用，需要模拟Android的认证方式
         HttpUtil recomm = new HttpUtil(RECOMM_URL_ANDROID, cookie);
         recomm.checkURL();
         Map<String, String> recprer = basepre;

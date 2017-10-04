@@ -74,6 +74,10 @@ public class ConfigManger {
         return v;
     }
 
+    /**
+     * 获取更新时间间隔
+     * @return 分钟
+     */
     public int getChangeInterval() {
 
         final String defaultValue = context.getString(R.string.time_default),
@@ -87,6 +91,10 @@ public class ConfigManger {
         }
     }
 
+    /**
+     * 获取随机模式
+     * @return
+     */
     public int getMethod() {
         final String defaultValue = context.getString(R.string.method_default),
                 s = preferences.getString("method", defaultValue);

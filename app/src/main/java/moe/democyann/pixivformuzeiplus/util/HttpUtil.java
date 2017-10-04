@@ -42,64 +42,65 @@ public class HttpUtil {
     }
 
     public String getData(Map<String, String> head) {
-        try {
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Cookie", cookie.toString());
-            for (String key : head.keySet()) {
-                conn.setRequestProperty(key, head.get(key));
-            }
-            conn.setDoInput(true);
-            conn.connect();
-
-            int status = conn.getResponseCode();
-
-            if (status != 200) {
-                Log.i(TAG, url.toString());
-                Log.w(TAG, "Response code: " + status);
-                Log.i(TAG, "getData: " + conn.getHeaderField("location"));
-                throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR " + status));
-            }
-            Log.d(TAG, "Response code: " + status);
-
-            List<String> set_cookie = conn.getHeaderFields().get("Set-Cookie");
-            if (set_cookie != null) {
-                for (String str : set_cookie) {
-                    String ci = str.substring(0, str.indexOf(";"));
-                    cookie.add(ci);
-                }
-            }
-
-
+        int retry = 5;
+        while (retry-- > 0) {
             try {
-                inputStream = conn.getInputStream();
-                inputStreamReader = new InputStreamReader(inputStream);
-                int read;
-                if ("gzip".equals(conn.getContentEncoding())) {
-                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
-                    inputStreamReader = new InputStreamReader(gzip);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Cookie", cookie.toString());
+                for (String key : head.keySet()) {
+                    conn.setRequestProperty(key, head.get(key));
                 }
-                buffer = new char[1024];
-                while ((read = inputStreamReader.read(buffer)) != -1) {
-                    restring += String.valueOf(buffer, 0, read);
+                conn.setDoInput(true);
+                conn.connect();
+
+                int status = conn.getResponseCode();
+
+                if (status != 200) {
+                    Log.i(TAG, url.toString());
+                    Log.w(TAG, "Response code: " + status);
+                    Log.i(TAG, "getData: " + conn.getHeaderField("location"));
+                    throw new RemoteMuzeiArtSource.RetryException(new Exception("HTTP ERROR " + status));
                 }
-            } finally {
+                Log.d(TAG, "Response code: " + status);
+
+                List<String> set_cookie = conn.getHeaderFields().get("Set-Cookie");
+                if (set_cookie != null) {
+                    for (String str : set_cookie) {
+                        String ci = str.substring(0, str.indexOf(";"));
+                        cookie.add(ci);
+                    }
+                }
+                String tempRes = "";
                 try {
-                    inputStream.close();
-                } catch (final IOException e) {
-                    Log.e(TAG, e.toString(), e);
-                    throw new RemoteMuzeiArtSource.RetryException(e);
+                    inputStream = conn.getInputStream();
+                    inputStreamReader = new InputStreamReader(inputStream);
+                    int read;
+                    if ("gzip".equals(conn.getContentEncoding())) {
+                        GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                        inputStreamReader = new InputStreamReader(gzip);
+                    }
+                    buffer = new char[1024];
+                    while ((read = inputStreamReader.read(buffer)) != -1) {
+                        tempRes += String.valueOf(buffer, 0, read);
+                    }
+                } finally {
+                    try {
+                        inputStream.close();
+                    } catch (final IOException e) {
+                        Log.e(TAG, e.toString(), e);
+                        throw new RemoteMuzeiArtSource.RetryException(e);
+                    }
                 }
+                return tempRes;
+            } catch (Exception e) {
+                Log.e(TAG, e.toString(), e);
+//                return "ERROR";
             }
-
-        } catch (Exception e) {
-            Log.e(TAG, e.toString(), e);
-            return "ERROR";
         }
-
-        return restring;
+        return "ERROR";
     }
 
     public String postData(Map<String, String> head, String poststr) {
@@ -196,90 +197,93 @@ public class HttpUtil {
 
 
     public boolean downloadImg(String referer, String USER_AGENT, File file) {
-        try {
-            String savePath = "/pixiv/";
-            // 创建外置缓存文件夹
-            File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
-            if (pPath.exists()) {
-                if (pPath.isFile()) {
-                    pPath.delete();
+        int retry = 5;
+        while (retry-- > 0) {
+            try {
+                String savePath = "/pixiv/";
+                // 创建外置缓存文件夹
+                File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
+                if (pPath.exists()) {
+                    if (pPath.isFile()) {
+                        pPath.delete();
+                        pPath.mkdir();
+                    }
+                } else {
                     pPath.mkdir();
                 }
-            } else {
-                pPath.mkdir();
-            }
 
-            FileOutputStream fileStream = new FileOutputStream(file);
+                FileOutputStream fileStream = new FileOutputStream(file);
 
-            String[] split = url.getFile().split("/");
-            String fileName = split[split.length - 1];
-            File newFile = new File(Environment.getExternalStorageDirectory() + savePath + fileName);
-            if (newFile.exists()) {
-                inputStream = new FileInputStream(newFile);
-                Log.d(TAG, "target image has been downloaded before.");
-            } else {
-                conn = (HttpURLConnection) url.openConnection();
-                setDownloadImgConn(conn, USER_AGENT, referer);
-                int status = conn.getResponseCode();
-                if(status == 404){
-                    conn.disconnect();
-                    url = new URL(url.toString().replace(".png",".jpg"));
-                    Log.d(TAG, "Replace PNG with JPG, " + url.toString());
-                    conn = (HttpURLConnection)url.openConnection();
+                String[] split = url.getFile().split("/");
+                String fileName = split[split.length - 1];
+                File newFile = new File(Environment.getExternalStorageDirectory() + savePath + fileName);
+                if (newFile.exists()) {
+                    inputStream = new FileInputStream(newFile);
+                    Log.d(TAG, "target image has been downloaded before.");
+                } else {
+                    conn = (HttpURLConnection) url.openConnection();
                     setDownloadImgConn(conn, USER_AGENT, referer);
-                    status = conn.getResponseCode();
-                }
+                    int status = conn.getResponseCode();
+                    if (status == 404) {
+                        conn.disconnect();
+                        url = new URL(url.toString().replace(".png", ".jpg"));
+                        Log.d(TAG, "Replace PNG with JPG, " + url.toString());
+                        conn = (HttpURLConnection) url.openConnection();
+                        setDownloadImgConn(conn, USER_AGENT, referer);
+                        status = conn.getResponseCode();
+                    }
 
-                if (status != 200) {
-                    Log.i(TAG, "downloadImg: ERROR,code"+ status);
-                    return false;
+                    if (status != 200) {
+                        Log.i(TAG, "downloadImg: ERROR,code" + status);
+                        return false;
+                    }
+                    inputStream = conn.getInputStream();
+                    if ("gzip".equals(conn.getContentEncoding())) {
+                        GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                        inputStream = gzip;
+                    }
                 }
-                inputStream = conn.getInputStream();
-                if ("gzip".equals(conn.getContentEncoding())) {
-                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
-                    inputStream = gzip;
-                }
-            }
-            try {
-                byte[] buff = new byte[1024 * 50];
-                int read;
-                while ((read = inputStream.read(buff)) > 0) {
-                    fileStream.write(buff, 0, read);
-                }
-            } finally {
-                fileStream.close();
-                try {
-                    inputStream.close();
-                } catch (Exception e) {
-                    Log.e(TAG, e.toString(), e);
-                    return false;
-                }
-            }
-            Log.d(TAG, "downloadImg finished.");
-
-            if (!newFile.exists()) {
-                FileOutputStream newFileStream = new FileOutputStream(newFile);
-                FileInputStream oldInputStream = new FileInputStream(file);
                 try {
                     byte[] buff = new byte[1024 * 50];
                     int read;
-                    while ((read = oldInputStream.read(buff)) > 0) {
-                        newFileStream.write(buff, 0, read);
+                    while ((read = inputStream.read(buff)) > 0) {
+                        fileStream.write(buff, 0, read);
                     }
                 } finally {
-                    newFileStream.close();
-                    oldInputStream.close();
+                    fileStream.close();
+                    try {
+                        inputStream.close();
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString(), e);
+                        return false;
+                    }
                 }
-            }
+                Log.d(TAG, "downloadImg finished.");
 
-        } catch (Exception e) {
-            Log.e(TAG, e.toString(), e);
-            return false;
+                if (!newFile.exists()) {
+                    FileOutputStream newFileStream = new FileOutputStream(newFile);
+                    FileInputStream oldInputStream = new FileInputStream(file);
+                    try {
+                        byte[] buff = new byte[1024 * 50];
+                        int read;
+                        while ((read = oldInputStream.read(buff)) > 0) {
+                            newFileStream.write(buff, 0, read);
+                        }
+                    } finally {
+                        newFileStream.close();
+                        oldInputStream.close();
+                    }
+                }
+                return true;
+
+            } catch (Exception e) {
+                Log.e(TAG, e.toString(), e);
+            }
         }
-        return true;
+        return false;
     }
 
-    private void  setDownloadImgConn(HttpURLConnection conn, String USER_AGENT, String referer) throws IOException {
+    private void setDownloadImgConn(HttpURLConnection conn, String USER_AGENT, String referer) throws IOException {
         conn.setReadTimeout(10000);
         conn.setConnectTimeout(15000);
         conn.setRequestMethod("GET");

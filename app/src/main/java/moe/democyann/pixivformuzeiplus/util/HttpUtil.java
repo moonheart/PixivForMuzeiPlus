@@ -200,48 +200,29 @@ public class HttpUtil {
         int retry = 5;
         while (retry-- > 0) {
             try {
-                String savePath = "/pixiv/";
-                // 创建外置缓存文件夹
-                File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
-                if (pPath.exists()) {
-                    if (pPath.isFile()) {
-                        pPath.delete();
-                        pPath.mkdir();
-                    }
-                } else {
-                    pPath.mkdir();
-                }
+                File tempFile = new File(file.getParent() + System.currentTimeMillis());
 
-                FileOutputStream fileStream = new FileOutputStream(file);
-
-                String[] split = url.getFile().split("/");
-                String fileName = split[split.length - 1];
-                File newFile = new File(Environment.getExternalStorageDirectory() + savePath + fileName);
-                if (newFile.exists()) {
-                    inputStream = new FileInputStream(newFile);
-                    Log.d(TAG, "target image has been downloaded before.");
-                } else {
+                FileOutputStream fileStream = new FileOutputStream(tempFile);
+                conn = (HttpURLConnection) url.openConnection();
+                setDownloadImgConn(conn, USER_AGENT, referer);
+                int status = conn.getResponseCode();
+                if (status == 404) {
+                    conn.disconnect();
+                    url = new URL(url.toString().replace(".png", ".jpg"));
+                    Log.d(TAG, "Replace PNG with JPG, " + url.toString());
                     conn = (HttpURLConnection) url.openConnection();
                     setDownloadImgConn(conn, USER_AGENT, referer);
-                    int status = conn.getResponseCode();
-                    if (status == 404) {
-                        conn.disconnect();
-                        url = new URL(url.toString().replace(".png", ".jpg"));
-                        Log.d(TAG, "Replace PNG with JPG, " + url.toString());
-                        conn = (HttpURLConnection) url.openConnection();
-                        setDownloadImgConn(conn, USER_AGENT, referer);
-                        status = conn.getResponseCode();
-                    }
+                    status = conn.getResponseCode();
+                }
 
-                    if (status != 200) {
-                        Log.i(TAG, "downloadImg: ERROR,code" + status);
-                        return false;
-                    }
-                    inputStream = conn.getInputStream();
-                    if ("gzip".equals(conn.getContentEncoding())) {
-                        GZIPInputStream gzip = new GZIPInputStream(inputStream);
-                        inputStream = gzip;
-                    }
+                if (status != 200) {
+                    Log.i(TAG, "downloadImg: ERROR,code" + status);
+                    return false;
+                }
+                inputStream = conn.getInputStream();
+                if ("gzip".equals(conn.getContentEncoding())) {
+                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
+                    inputStream = gzip;
                 }
                 try {
                     byte[] buff = new byte[1024 * 50];
@@ -258,26 +239,14 @@ public class HttpUtil {
                         return false;
                     }
                 }
+                tempFile.renameTo(file);
                 Log.d(TAG, "downloadImg finished.");
 
-                if (!newFile.exists()) {
-                    FileOutputStream newFileStream = new FileOutputStream(newFile);
-                    FileInputStream oldInputStream = new FileInputStream(file);
-                    try {
-                        byte[] buff = new byte[1024 * 50];
-                        int read;
-                        while ((read = oldInputStream.read(buff)) > 0) {
-                            newFileStream.write(buff, 0, read);
-                        }
-                    } finally {
-                        newFileStream.close();
-                        oldInputStream.close();
-                    }
-                }
                 return true;
 
             } catch (Exception e) {
                 Log.e(TAG, e.toString(), e);
+                Log.w(TAG, "image download retrying.");
             }
         }
         return false;

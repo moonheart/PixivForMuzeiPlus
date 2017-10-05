@@ -253,39 +253,39 @@ public class PixivSource extends RemoteMuzeiArtSource {
         publishArtwork(artwork);
 
         //清理无用缓存
-        if (!artwork.equals(last)) {
-            try {
-                File f = new File(getDir(), last.getToken());
-                f.delete();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
+//        if (!artwork.equals(last)) {
+//            try {
+//                File f = new File(getDir(), last.getToken());
+//                f.delete();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
 
         scheduleUpdate();
     }
 
     private File getDir() {
 
-//        String savePath = "/pixiv/";
-//        // 创建外置缓存文件夹
-//        File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
-//        if (pPath.exists()) {
-//            if (pPath.isFile()) {
-//                pPath.delete();
-//                pPath.mkdir();
-//            }
+        String savePath = "/pixiv/";
+                // 创建外置缓存文件夹
+                File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
+                if (pPath.exists()) {
+                    if (pPath.isFile()) {
+                        pPath.delete();
+                        pPath.mkdir();
+                    }
+                } else {
+                    pPath.mkdir();
+                }
+                return pPath;
+//        Application app = getApplication();
+//        if (app.getExternalCacheDir() == null) {
+//            return app.getCacheDir();
 //        } else {
-//            pPath.mkdir();
+//            return app.getExternalCacheDir();
 //        }
-//        return pPath;
-        Application app = getApplication();
-        if (app.getExternalCacheDir() == null) {
-            return app.getCacheDir();
-        } else {
-            return app.getExternalCacheDir();
-        }
     }
 
 

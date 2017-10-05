@@ -224,9 +224,10 @@ public class PixivLike {
         }
 
 //        Random ra = new Random();
-        int rn = r.nextInt(1000);
-        File file = new File(dir,info.getUser_id()+info.getImg_id()+rn);
-        Uri uri=pixiv.downloadImage(info.getImg_url(),info.getImg_id(),file,true);
+//        int rn = r.nextInt(1000);
+
+        File file = new File(dir,pixiv.getFilename(info.getImg_url()));
+        Uri uri=pixiv.downloadImage(pixiv.getOriginalUrl(info.getImg_url()),info.getImg_id(),file,true);
         if(uri==null){
             error="2001";
             throw new RemoteMuzeiArtSource.RetryException();
@@ -236,7 +237,7 @@ public class PixivLike {
                 .title(info.getImg_name())
                 .byline(info.getUser_name())
                 .imageUri(f)
-                .token(info.getUser_id()+info.getImg_id()+rn)
+                .token(pixiv.getFilename(info.getImg_url()))
                 .viewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + info.getImg_id())))
                 .build();
 

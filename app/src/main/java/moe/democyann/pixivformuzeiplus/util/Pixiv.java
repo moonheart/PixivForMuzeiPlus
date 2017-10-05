@@ -264,6 +264,7 @@ public class Pixiv {
         }
         return list;
     }
+
     /***
      * 获取推荐列表(Android)
      * @return 推荐列表
@@ -368,13 +369,14 @@ public class Pixiv {
 
     /**
      * 使用网页解析收藏列表
+     *
      * @return
      */
     public List getBooklistHtml(Boolean isAll, Integer maxPage) {
         ArrayList list = new ArrayList();
         HttpUtil book;
         Integer page = 1;
-        while (isAll || page<=maxPage){
+        while (isAll || page <= maxPage) {
             String tempurl = String.format(BOOK_URL_WWW, userid, page);
             book = new HttpUtil(tempurl, cookie);
             book.checkURL();
@@ -387,10 +389,10 @@ public class Pixiv {
             Document document = Jsoup.parse(restring);
             Elements select = document.select(".image-item img[data-id]");
             Log.i(TAG, "HTML node count:" + select.size());
-            if(select.size()==0){
+            if (select.size() == 0) {
                 break;
             }
-            for (org.jsoup.nodes.Element element:select) {
+            for (org.jsoup.nodes.Element element : select) {
                 String id = element.attr("data-id");
                 list.add(Integer.parseInt(id));
             }
@@ -398,13 +400,16 @@ public class Pixiv {
         }
         return list;
     }
-    public List getBooklistHtml(Boolean isAll){
+
+    public List getBooklistHtml(Boolean isAll) {
         return getBooklistHtml(isAll, 10);
     }
-    public List getBooklistHtml(Integer maxPage){
+
+    public List getBooklistHtml(Integer maxPage) {
         return getBooklistHtml(false, maxPage);
     }
-    public List getBooklistHtml(){
+
+    public List getBooklistHtml() {
         return getBooklistHtml(false, 10);
     }
 
@@ -466,6 +471,7 @@ public class Pixiv {
             return null;
         }
     }
+
     /***
      * 获取作品信息方式3 TOUCH
      * @param id 作品ID
@@ -496,6 +502,7 @@ public class Pixiv {
             return null;
         }
     }
+
     /***
      * 获取作品信息方式
      * @param id 作品ID
@@ -612,7 +619,6 @@ public class Pixiv {
 //        }
 
 
-
         o.setImg_id(img_id);
         o.setImg_name(img_name);
         o.setImg_url(img_url);
@@ -637,39 +643,45 @@ public class Pixiv {
      * @return 图片文件 Uri
      */
     public Uri downloadImage(String imgurl, String workid, File file, boolean x) {
+        String ref = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + workid;
+
+        Log.i(TAG, "downloadImage: " + imgurl);
+        HttpUtil download = new HttpUtil(imgurl, null);
+        download.checkURL();
+        if (file.exists()) {
+            Log.i(TAG, "target image has been downloaded before.");
+        }else if(!download.downloadImg(ref, USER_AGENT, file)){
+            return null;
+        }
+        return Uri.parse("file://" + file.getAbsolutePath());
+    }
+
+    /**
+     * 获取原图URL
+     * @param imgurl
+     * @return
+     */
+    public String getOriginalUrl(String imgurl) {
         // 略缩：https://i.pximg.net/c/150x150/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
         // 高清：https://i.pximg.net/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
         // 原图：https://i.pximg.net/img-original/img/2016/11/05/21/07/57/59813504_p0.png
         // 或者：https://i.pximg.net/img-original/img/2010/08/30/00/32/39/12904418_p0.jpg
-        Log.d(TAG, imgurl);
-        String smail = imgurl;
-        String ref = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + workid;
-
-        String big = smail;
-
-        if (x) {
-            big = Pattern.compile("/c/[0-9]+x[0-9]+/img-master").matcher(imgurl).replaceFirst("/img-original");
-            Log.d(TAG, big);
-            big = Pattern.compile("\\_master[0-9]+\\.jpg").matcher(big).replaceFirst(".png");
-            Log.d(TAG, big);
-
-//            pattern = Pattern.compile("/c/[0-9]+x[0-9]+/img-master");
-//            matcher = pattern.matcher(imgurl);
-//            if (matcher.find()) {
-//                big = matcher.replaceFirst("/img-master");
-//            }
-        }
-
-        Log.i(TAG, "downloadImage: " + big);
-        HttpUtil download = new HttpUtil(big, null);
-        download.checkURL();
-
-        if (download.downloadImg(ref, USER_AGENT, file)) {
-            return Uri.parse("file://" + file.getAbsolutePath());
-        } else {
-            return null;
-        }
+        String big = Pattern.compile("/c/[0-9]+x[0-9]+/img-master").matcher(imgurl).replaceFirst("/img-original");
+        big = Pattern.compile("\\_master[0-9]+\\.(jpg|png)", Pattern.CASE_INSENSITIVE).matcher(big).replaceFirst(".png");
+        Log.d(TAG, String.format("%s -> %s", imgurl, big));
+        return big;
     }
 
+    /**
+     * 获取文件名
+     *
+     * @param imgurl
+     * @return
+     */
+    public String getFilename(String imgurl) {
+        String[] split = getOriginalUrl(imgurl).split("/");
+        String fileName = split[split.length - 1];
+        return fileName;
+    }
 
 }

@@ -135,8 +135,8 @@ public class PixivTop50 {
 
 //            Random ra = new Random();
             int rn=r.nextInt(1000);
-            File file = new File(dir,user_id+img_id+rn);
-            Uri fileUri=pixiv.downloadImage(img_url,img_id,file,true);
+            File file = new File(dir,pixiv.getFilename(img_url));
+            Uri fileUri=pixiv.downloadImage(pixiv.getOriginalUrl(img_url),img_id,file,true);
 //            if(!mess.equals("")) user_name=mess;
             if(fileUri==null){
                 error="2001";
@@ -151,7 +151,7 @@ public class PixivTop50 {
                     .title(illust_title)
                     .byline(user_name)
                     .imageUri(f)
-                    .token(user_id+img_id+rn)
+                    .token(pixiv.getFilename(img_url))
                     .viewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + img_id)))
                     .build();
         }

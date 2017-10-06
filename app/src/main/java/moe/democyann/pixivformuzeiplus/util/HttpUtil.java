@@ -200,7 +200,7 @@ public class HttpUtil {
         int retry = 5;
         while (retry-- > 0) {
             try {
-                File tempFile = new File(file.getParent() + System.currentTimeMillis());
+                File tempFile = new File(file.getParent() + "/" + System.currentTimeMillis());
 
                 FileOutputStream fileStream = new FileOutputStream(tempFile);
                 conn = (HttpURLConnection) url.openConnection();

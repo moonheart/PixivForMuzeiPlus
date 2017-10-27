@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "moe.democyann.pixivformuzeiplus"
         minSdkVersion 19
@@ -20,14 +20,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+//    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    testCompile 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:25.3.1'
+    androidTestImplementation 'junit:junit:4.12'
 //    compile files('libs/muzei-api-2.0.jar')
 //    compile files('libs/muzei-api-2.0-javadoc.jar')
-    compile 'com.google.android.apps.muzei:muzei-api:2.+'
-    compile 'org.jsoup:jsoup:1.10.3'
+    implementation 'com.google.android.apps.muzei:muzei-api:2.+'
+    implementation 'org.jsoup:jsoup:1.10.3'
 }

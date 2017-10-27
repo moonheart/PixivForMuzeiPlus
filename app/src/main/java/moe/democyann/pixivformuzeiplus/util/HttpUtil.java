@@ -199,8 +199,8 @@ public class HttpUtil {
     public boolean downloadImg(String referer, String USER_AGENT, File file) {
         int retry = 5;
         while (retry-- > 0) {
+            File tempFile = new File(file.getParent() + "/" + System.currentTimeMillis());
             try {
-                File tempFile = new File(file.getParent() + "/" + System.currentTimeMillis());
 
                 FileOutputStream fileStream = new FileOutputStream(tempFile);
                 conn = (HttpURLConnection) url.openConnection();
@@ -245,6 +245,7 @@ public class HttpUtil {
                 return true;
 
             } catch (Exception e) {
+                if(tempFile.exists()) tempFile.delete();
                 Log.e(TAG, e.toString(), e);
                 Log.w(TAG, "image download retrying.");
             }

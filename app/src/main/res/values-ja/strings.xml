@@ -24,6 +24,9 @@
     <string name="views_set">閲覧数設定</string>
     <string name="views_set_li">設定した閲覧数を上回る場合のみ画像をロードします。範囲内ではない場合はロードできないことがあります。</string>
     <string name="views_set_title">閲覧数の最低限(0-50000)</string>
+    <string name="BookmarkCount_set">ブックマーク数</string>
+    <string name="BookmarkCount_set_li">設定したブックマーク数を上回る場合のみ画像をロードします。範囲内ではない場合はロードできないことがあります。</string>
+    <string name="BookmarkCount_set_title">ブックマーク数の最低限(0-50000)</string>
     <string name="method_default">0</string>
     <string name="method_title">おまかせモード</string>
     <string name="we">このアプリはMuzei live wallpaperのソースとしてインストールされます。ご利用いただけるにはMuzeiをインストールしてください。</string>

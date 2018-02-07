@@ -186,7 +186,7 @@ public class PixivUser {
                 throw new RemoteMuzeiArtSource.RetryException();
             }
 
-            if (cont >= 5) {
+            if (cont >= 10) {
                 break;
             }
 
@@ -198,6 +198,10 @@ public class PixivUser {
             }
 
             if (conf.getView() > info.getView()) {
+                cont++;
+                continue;
+            }
+            if (conf.getBootmarkCount() > info.getBookmarkCount()) {
                 cont++;
                 continue;
             }
@@ -353,6 +357,10 @@ public class PixivUser {
             }
 
             if (conf.getView() > info.getView()) {
+                cont++;
+                continue;
+            }
+            if (conf.getBootmarkCount() > info.getBookmarkCount()) {
                 cont++;
                 continue;
             }

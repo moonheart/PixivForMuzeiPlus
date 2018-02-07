@@ -66,6 +66,14 @@
             android:dialogTitle="@string/views_set_title"
             android:defaultValue="0"
             />
+        <EditTextPreference
+            android:key="BookmarkCount"
+            android:inputType="number"
+            android:title="@string/BookmarkCount_set"
+            android:summary="@string/BookmarkCount_set_li"
+            android:dialogTitle="@string/BookmarkCount_set_title"
+            android:defaultValue="0"
+            />
 
         <CheckBoxPreference
             android:key="is_autopx"

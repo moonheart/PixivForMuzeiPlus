@@ -26,6 +26,9 @@
     <string name="views_set">最低浏览量</string>
     <string name="views_set_li">只显示大于此浏览量的图片，过大可能无法加载</string>
     <string name="views_set_title">最低浏览量(0-50000)</string>
+    <string name="BookmarkCount_set">收藏量</string>
+    <string name="BookmarkCount_set_li">只显示大于此收藏量的图片，过大可能无法加载</string>
+    <string name="BookmarkCount_set_title">最低收藏量(0-50000)</string>
     <string name="method_default">0</string>
     <string name="method_title">推荐模式</string>
     <string name="we">这个 APP 是 Muzei Live Wallpaper 的壁纸源，不能单独运行，请先安装 Muzei 并在 Muzei 的 Source 设置界面选择启动即可。</string>

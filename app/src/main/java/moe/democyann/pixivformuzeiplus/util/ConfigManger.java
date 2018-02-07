@@ -67,6 +67,18 @@ public class ConfigManger {
         if (v > 50000) v = 50000;
         return v;
     }
+    public long getBootmarkCount() {
+        String defaultValue = "0",
+                s = preferences.getString("BookmarkCount", defaultValue);
+        long v = 0;
+        try {
+            v = Long.valueOf(s);
+        } catch (Exception e) {
+            Log.e(TAG, "getBootmarkCount: ", e);
+        }
+        if (v > 50000) v = 50000;
+        return v;
+    }
 
     public boolean getIs_no_R18() {
         boolean defaultValue = true,

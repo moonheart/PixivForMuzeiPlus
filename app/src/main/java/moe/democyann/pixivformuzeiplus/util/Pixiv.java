@@ -503,133 +503,46 @@ public class Pixiv {
         }
     }
 
+    private ImgInfo getInfoFromMobilePage(String id){
+        HttpUtil http = new HttpUtil(String.format("https://www.pixiv.net/member_illust.php?mode=medium&illust_id=%s",id), cookie);
+        http.checkURL();
+        Map<String, String> headers = basepre;
+        headers.remove("User-Agent");
+        headers.put("Referer", "https://www.pixiv.net/");
+        headers.put("Accept-Encoding", "gzip, deflate, br");
+        headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+        headers.put("X-Requested-With", "XMLHttpRequest");
+        headers.put("User-Agent","Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36");
+
+        String html = http.getData(headers);
+        Document doc = Jsoup.parse(html);
+        ImgInfo info = new ImgInfo();
+
+        info.setImg_id(id);
+        info.setImg_name(doc.select("span.title").text());
+        info.setImg_url(doc.select(".img-box div.imgbox img").attr("src"));
+        info.setTags(doc.select("div.works-info-tags .tag").eachText().toString());
+        info.setR18(TagFliter.is_r18(info.getTags()));
+
+        Pattern p = Pattern.compile("data-user-id=\"(\\d+)\"");
+        Matcher  m = p.matcher(html);
+        if(m.find()){
+            info.setUser_id(m.group(1));
+        }
+
+        info.setUser_name(doc.select(".author .username").eq(0).text());
+        info.setView(Integer.parseInt(doc.select(".activity-views strong").text()));
+//        info.setPx();
+        return info;
+    }
+
     /***
      * 获取作品信息方式
      * @param id 作品ID
      * @return
      */
     public ImgInfo getIllInfo(String id) {
-
-        ImgInfo o = new ImgInfo();
-
-        String img_url = "";  //图像地址
-        String img_name = ""; //图像标题
-        String img_id = "";   //图像ID
-        String user_id = "";  //作者ID
-        String user_name = "";//作者名称
-        String tags = "";     //图像标签
-        boolean r18 = false;  //R18标志
-        int img_width = 0;
-        int img_height = 0;
-
-        int view = 0;         //浏览数量
-
-        //=============解析信息1=============
-//
-//        JSONObject temp=getIllInfo1(id);
-//
-//        if(temp==null) {
-//            return null;
-//        }
-//
-//        try {
-//
-//            JSONObject ill=temp.getJSONObject("illust");
-//            JSONObject imgurls;
-//
-//            //获取浏览数量
-//            view=ill.getInt("total_view");
-//
-//            //根据不同的页数获取图片地址
-//            if(ill.getInt("page_count")>1){
-//                imgurls=ill.getJSONArray("meta_pages").getJSONObject(0).getJSONObject("image_urls");
-//                img_url=imgurls.getString("original");
-//            }else {
-//                imgurls = ill.getJSONObject("meta_single_page");
-//                img_url=imgurls.getString("original_image_url");
-//            }
-//            img_width=ill.getInt("width");
-//            img_height=ill.getInt("height");
-//
-//            CharSequence c= "limit_r18";
-//
-//            if(img_url.contains(c)){
-//                r18=true;
-//            }else{
-//                r18=false;
-//            }
-//
-//            JSONObject user = ill.getJSONObject("user");
-//            user_id=user.getString("id");
-//            user_name=user.getString("name");
-//            img_id=ill.getString("id");
-//            img_name=ill.getString("title");
-//            tags=ill.getString("tags");
-//
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            error+=",1035";
-//            return null;
-//        }
-
-        //=================解析信息2=============
-        if (r18) {
-        }
-        JSONObject temp = getIllInfo2(id);
-        if (temp == null) {
-            return null;
-        }
-
-        try {
-
-            user_id = temp.getString("illust_user_id");
-            img_id = temp.getString("illust_id");
-            img_url = temp.getString("url");
-            user_name = temp.getString("user_name");
-            img_name = temp.getString("illust_title");
-            tags = temp.getString("tags");
-
-        } catch (JSONException e) {
-            error += ",1036";
-            e.printStackTrace();
-            return null;
-        }
-        //=================解析信息3=============
-//        JSONObject temp = getIllInfo3(id);
-//        if (temp == null) {
-//            return null;
-//        }
-//
-//        try {
-//
-//            user_id = temp.getString("illust_user_id");
-//            img_id = temp.getString("illust_id");
-//            img_url = temp.getString("url");
-//            user_name = temp.getString("user_name");
-//            img_name = temp.getString("illust_title");
-//            //tags = temp.getString("tags");
-//            img_height = temp.getInt("illust_height");
-//            img_width = temp.getInt("illust_width");
-//
-//        } catch (JSONException e) {
-//            error += ",1036";
-//            e.printStackTrace();
-//            return null;
-//        }
-
-
-        o.setImg_id(img_id);
-        o.setImg_name(img_name);
-        o.setImg_url(img_url);
-        o.setUser_id(user_id);
-        o.setUser_name(user_name);
-        o.setR18(r18);
-        o.setTags(tags);
-        o.setView(view);
-        o.setPx((img_width * 1.00) / img_height);
-        Log.i(TAG, "getIllInfo: IMGPX" + img_width + " * " + img_height);
-
+        ImgInfo o = getInfoFromMobilePage(id);
         return o;
     }
 

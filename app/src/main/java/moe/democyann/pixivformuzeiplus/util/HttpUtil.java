@@ -254,8 +254,8 @@ public class HttpUtil {
     }
 
     private void setDownloadImgConn(HttpURLConnection conn, String USER_AGENT, String referer) throws IOException {
-        conn.setReadTimeout(10000);
-        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(60000);
+        conn.setConnectTimeout(60000);
         conn.setRequestMethod("GET");
         conn.setRequestProperty("User-Agent", USER_AGENT);
         conn.setRequestProperty("Referer", referer);

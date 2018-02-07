@@ -17,6 +17,16 @@ public class ImgInfo {
 
     private int view=0;         //浏览数量
 
+    public int getBookmarkCount() {
+        return bookmarkCount;
+    }
+
+    public void setBookmarkCount(int bookmarkCount) {
+        this.bookmarkCount = bookmarkCount;
+    }
+
+    private int bookmarkCount = 0;//收藏数量
+
     public double getPx() {
         return px;
     }

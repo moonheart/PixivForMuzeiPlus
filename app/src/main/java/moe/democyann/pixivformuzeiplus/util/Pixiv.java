@@ -532,6 +532,7 @@ public class Pixiv {
 
         info.setUser_name(doc.select(".author .username").eq(0).text());
         info.setView(Integer.parseInt(doc.select(".activity-views strong").text()));
+        info.setBookmarkCount(Integer.parseInt(doc.select(".activity-likes .bookmark-count").text()));
 //        info.setPx();
         return info;
     }

@@ -34,7 +34,6 @@ public class Pixiv {
     private final String RECOMM_URL = "https://www.pixiv.net/rpc/recommender.php?type=illust&sample_illusts=auto&num_recommendations=500&page=discovery&tt=";
     private final String RECOMM_URL_ANDROID = "https://app-api.pixiv.net/v1/illust/recommended?filter=for_android";
     private final String ILLUST_URL = "https://www.pixiv.net/rpc/illust_list.php?verbosity=&exclude_muted_illusts=1&illust_ids=";
-    private final String ILLUST_URL_TOUCH = "https://touch.pixiv.net/ajax_api/ajax_api.php?mode=illust_data&illusts=";
 
     private final String DETA_URL = "https://app-api.pixiv.net/v1/illust/detail?illust_id=";
 
@@ -45,6 +44,7 @@ public class Pixiv {
 
     private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
             + "Chrome/42.0.2311.152 Safari/537.36";
+    private static final String USER_AGENT_MOBILE = "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
 
     private Map<String, String> basepre;
     private final String TAG = "PixivUtil";
@@ -472,47 +472,16 @@ public class Pixiv {
         }
     }
 
-    /***
-     * 获取作品信息方式3 TOUCH
-     * @param id 作品ID
-     * @return
-     */
-    private JSONObject getIllInfo3(String id) {
-        Log.i(TAG, "getIllInfo: " + token);
-        HttpUtil illust = new HttpUtil(ILLUST_URL_TOUCH + id + "&tt=" + token, cookie);
-        illust.checkURL();
-        Map<String, String> recprer = basepre;
-        recprer.put("Referer", "https://touch.pixiv.net/discovery");
-        recprer.put("Accept", "*/*");
-        recprer.put("X-Requested-With", "XMLHttpRequest");
-        restring = illust.getData(recprer);
-        if (restring.equals("ERROR")) {
-            error = "1033";
-            return null;
-        }
-        try {
-            //restring = restring.replaceFirst("null", "");
-            Log.i(TAG, restring);
-            JSONArray arr = new JSONArray(restring);
-            return arr.getJSONObject(0);
-        } catch (JSONException e) {
-            Log.d(TAG, restring);
-            Log.e(TAG, e.toString(), e);
-            error = "1034";
-            return null;
-        }
-    }
 
     private ImgInfo getInfoFromMobilePage(String id){
         HttpUtil http = new HttpUtil(String.format("https://www.pixiv.net/member_illust.php?mode=medium&illust_id=%s",id), cookie);
         http.checkURL();
         Map<String, String> headers = basepre;
         headers.remove("User-Agent");
-        headers.put("Referer", "https://www.pixiv.net/");
+        headers.put("Referer", "https://www.pixiv.net/discovery");
         headers.put("Accept-Encoding", "gzip, deflate, br");
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-        headers.put("X-Requested-With", "XMLHttpRequest");
-        headers.put("User-Agent","Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36");
+        headers.put("User-Agent",USER_AGENT_MOBILE);
 
         String html = http.getData(headers);
         Document doc = Jsoup.parse(html);
@@ -537,6 +506,7 @@ public class Pixiv {
         return info;
     }
 
+
     /***
      * 获取作品信息方式
      * @param id 作品ID
@@ -557,14 +527,14 @@ public class Pixiv {
      * @return 图片文件 Uri
      */
     public Uri downloadImage(String imgurl, String workid, File file, boolean x) {
-        String ref = "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + workid;
+        String ref = "https://www.pixiv.net/member_illust.php?mode=big&illust_id=" + workid;
 
         Log.i(TAG, "downloadImage: " + imgurl);
         HttpUtil download = new HttpUtil(imgurl, null);
         download.checkURL();
         if (file.exists()) {
             Log.i(TAG, "target image has been downloaded before.");
-        }else if(!download.downloadImg(ref, USER_AGENT, file)){
+        }else if(!download.downloadImg(ref, USER_AGENT_MOBILE, file)){
             return null;
         }
         return Uri.parse("file://" + file.getAbsolutePath());
@@ -576,13 +546,15 @@ public class Pixiv {
      * @return
      */
     public String getOriginalUrl(String imgurl) {
-        // 略缩：https://i.pximg.net/c/150x150/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
+        // 略缩：https://i.pximg.net/c/150x150_90/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
         // 高清：https://i.pximg.net/img-master/img/2016/11/05/21/07/57/59813504_p0_master1200.jpg
         // 原图：https://i.pximg.net/img-original/img/2016/11/05/21/07/57/59813504_p0.png
         // 或者：https://i.pximg.net/img-original/img/2010/08/30/00/32/39/12904418_p0.jpg
+//        Log.d(TAG, imgurl);
         String big = Pattern.compile("/c/[0-9]+x[0-9]+/img-master").matcher(imgurl).replaceFirst("/img-original");
+        big = Pattern.compile("/c/[0-9]+x[0-9]+_\\d+/img-master").matcher(big).replaceFirst("/img-original");
         big = Pattern.compile("\\_master[0-9]+\\.(jpg|png)", Pattern.CASE_INSENSITIVE).matcher(big).replaceFirst(".png");
-        Log.d(TAG, String.format("%s -> %s", imgurl, big));
+//        Log.d(TAG, String.format("%s -> %s", imgurl, big));
         return big;
     }
 

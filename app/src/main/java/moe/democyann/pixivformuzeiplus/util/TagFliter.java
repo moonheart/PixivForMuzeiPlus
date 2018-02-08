@@ -20,6 +20,7 @@ public class TagFliter {
         if(matcher.find()){
             flag=true;
             Log.i(TAG, "Is R18 Image");
+            return flag;
         }
         return flag;
     }

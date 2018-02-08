@@ -30,4 +30,5 @@ dependencies {
 //    compile files('libs/muzei-api-2.0-javadoc.jar')
     implementation 'com.google.android.apps.muzei:muzei-api:2.+'
     implementation 'org.jsoup:jsoup:1.10.3'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
 }

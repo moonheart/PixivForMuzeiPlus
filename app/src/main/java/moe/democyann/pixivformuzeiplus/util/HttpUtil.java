@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * Created by demo on 3/31/17.
  */
@@ -33,6 +37,7 @@ public class HttpUtil {
     private String restring;
     private char[] buffer;
     private Cookie cookie;
+//    OkHttpClient httpClient = new OkHttpClient();
 
     private String TAG = "PixivHttpUtil";
 
@@ -45,6 +50,7 @@ public class HttpUtil {
         int retry = 5;
         while (retry-- > 0) {
             try {
+
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000);
                 conn.setConnectTimeout(15000);
@@ -202,63 +208,68 @@ public class HttpUtil {
             File tempFile = new File(file.getParent() + "/" + System.currentTimeMillis());
             try {
 
-                FileOutputStream fileStream = new FileOutputStream(tempFile);
-                conn = (HttpURLConnection) url.openConnection();
-                setDownloadImgConn(conn, USER_AGENT, referer);
-                int status = conn.getResponseCode();
-                if (status == 404) {
-                    conn.disconnect();
-                    url = new URL(url.toString().replace(".png", ".jpg"));
-                    Log.d(TAG, "Replace PNG with JPG, " + url.toString());
-                    conn = (HttpURLConnection) url.openConnection();
-                    setDownloadImgConn(conn, USER_AGENT, referer);
-                    status = conn.getResponseCode();
-                }
+                OkHttpClient httpClient = new OkHttpClient();
+                Response response = httpClient.newCall(buildRequest(url, referer)).execute();
 
-                if (status != 200) {
-                    Log.i(TAG, "downloadImg: ERROR,code" + status);
-                    return false;
-                }
-                inputStream = conn.getInputStream();
-                if ("gzip".equals(conn.getContentEncoding())) {
-                    GZIPInputStream gzip = new GZIPInputStream(inputStream);
-                    inputStream = gzip;
-                }
-                try {
-                    byte[] buff = new byte[1024 * 50];
-                    int read;
-                    while ((read = inputStream.read(buff)) > 0) {
-                        fileStream.write(buff, 0, read);
+                if(!response.isSuccessful()){
+                    if(response.code()==404){
+                        url = new URL(url.toString().replace(".png", ".jpg"));
+                        response = httpClient.newCall(buildRequest(url, referer)).execute();
                     }
-                } finally {
-                    fileStream.close();
-                    try {
-                        inputStream.close();
-                    } catch (Exception e) {
-                        Log.e(TAG, e.toString(), e);
+                    else if(response.code()==403){
+                        Log.d(TAG, "403 Forbidden");
                         return false;
                     }
                 }
+                if(response.isSuccessful()){
+                    FileOutputStream fileStream = new FileOutputStream(tempFile);
+                    inputStream = response.body().byteStream();
+                    try {
+                        byte[] buff = new byte[1024 * 50];
+                        int read;
+                        while ((read = inputStream.read(buff)) > 0) {
+                            fileStream.write(buff, 0, read);
+                        }
+                    } finally {
+                        fileStream.close();
+                        try {
+                            inputStream.close();
+                        } catch (Exception e) {
+                            Log.e(TAG, e.toString(), e);
+                            return false;
+                        }
+                    }
+                }
+
                 tempFile.renameTo(file);
                 Log.d(TAG, "downloadImg finished.");
 
                 return true;
 
             } catch (Exception e) {
-                if(tempFile.exists()) tempFile.delete();
                 Log.e(TAG, e.toString(), e);
                 Log.w(TAG, "image download retrying.");
+            }
+            finally {
+                if(tempFile.exists()) tempFile.delete();
             }
         }
         return false;
     }
 
+    private Request buildRequest(URL url, String referer){
+        return new Request.Builder()
+                .url(url)
+                .addHeader("Referer", referer)
+                .get()
+                .build();
+    }
+
     private void setDownloadImgConn(HttpURLConnection conn, String USER_AGENT, String referer) throws IOException {
         conn.setReadTimeout(60000);
         conn.setConnectTimeout(60000);
-        conn.setRequestMethod("GET");
         conn.setRequestProperty("User-Agent", USER_AGENT);
-        conn.setRequestProperty("Referer", referer);
+        conn.setRequestMethod("GET");
         conn.setDoInput(true);
         conn.connect();
     }

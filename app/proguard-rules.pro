@@ -88,3 +88,8 @@
     @android.support.annotation.Keep <init>(...);
 }
 
+-ignorewarnings
+
+-keep class * {
+    public private *;
+}

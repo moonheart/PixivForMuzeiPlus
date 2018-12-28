@@ -24,16 +24,16 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String sql = "create table if not exists " + TABLE_NAME1 + " (Id integer primary key AUTOINCREMENT, Info text)";
         db.execSQL(sql);
-        sql="create table if not exists " + TABLE_NAME2 + " (Key text primary key, Value text)";
+        sql="create table if not exists " + TABLE_NAME2 + " ([Key] text primary key, Value text)";
         db.execSQL(sql);
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('last','0')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('rallList','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('commList','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('likeList','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('cookie','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('token','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('username','')");
-        db.execSQL("insert into "+ TABLE_NAME2 + " (Key,Value) values('userid','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('last','0')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('rallList','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('commList','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('likeList','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('cookie','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('token','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('username','')");
+        db.execSQL("insert into "+ TABLE_NAME2 + " ([Key],Value) values('userid','')");
 
     }
 

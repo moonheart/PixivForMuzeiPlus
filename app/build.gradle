@@ -20,14 +20,11 @@ android {
 }
 
 dependencies {
-//    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation 'com.android.support:appcompat-v7:28.0.0'
     androidTestImplementation 'junit:junit:4.12'
-//    compile files('libs/muzei-api-2.0.jar')
-//    compile files('libs/muzei-api-2.0-javadoc.jar')
     implementation 'com.google.android.apps.muzei:muzei-api:2.+'
     implementation 'org.jsoup:jsoup:1.10.3'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'

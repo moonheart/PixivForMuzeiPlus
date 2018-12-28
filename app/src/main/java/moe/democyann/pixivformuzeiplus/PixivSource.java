@@ -252,17 +252,6 @@ public class PixivSource extends RemoteMuzeiArtSource {
         //推送图片
         publishArtwork(artwork);
 
-        //清理无用缓存
-//        if (!artwork.equals(last)) {
-//            try {
-//                File f = new File(getDir(), last.getToken());
-//                f.delete();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//
-//        }
-
         scheduleUpdate();
     }
 
@@ -280,12 +269,6 @@ public class PixivSource extends RemoteMuzeiArtSource {
                     pPath.mkdir();
                 }
                 return pPath;
-//        Application app = getApplication();
-//        if (app.getExternalCacheDir() == null) {
-//            return app.getCacheDir();
-//        } else {
-//            return app.getExternalCacheDir();
-//        }
     }
 
 

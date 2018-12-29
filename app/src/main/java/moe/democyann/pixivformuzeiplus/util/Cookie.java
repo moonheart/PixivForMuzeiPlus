@@ -29,7 +29,7 @@ public class Cookie {
     }
 
     public boolean add(String str){
-        if(str.indexOf("=")==-1) return false;
+        if(!str.contains("=")) return false;
         String[] arr=str.split("=");
         this.add(arr[0], arr[1]);
         return true;

@@ -20,8 +20,9 @@ public class DbUtil {
     }
 
     /***
-     * 插入图片信息数据
+     * 插入图片信息数据，并返回当前已有数量
      * @param str
+     * @return 当前已有数量
      */
     public int  insertImg(String str){
         int count=0;
@@ -29,8 +30,10 @@ public class DbUtil {
         values.put("Info",str);
         db=dbHelper.getWritableDatabase();
 //        db.beginTransaction();
-        db.insert(dbHelper.TABLE_NAME1,null,values);
-        Cursor cursor = db.query(dbHelper.TABLE_NAME1,new String[]{"Info"},null,null,null,null,null);
+        db.insert(DbHelper.TABLE_NAME_IMAGE,null,values);
+//        db.rawQuery("select count(Id) from "+DbHelper.TABLE_NAME_IMAGE, new String[0]).getInt(0);
+        // todo 使用count替换查询所有数据
+        Cursor cursor = db.query(DbHelper.TABLE_NAME_IMAGE,new String[]{"Info"},null,null,null,null,null);
         count=cursor.getCount();
         db.close();
         return count;
@@ -43,7 +46,7 @@ public class DbUtil {
     public void cleanDb(){
         db=dbHelper.getWritableDatabase();
 //        db.beginTransaction();
-        db.delete(dbHelper.TABLE_NAME1,null,null);
+        db.delete(DbHelper.TABLE_NAME_IMAGE,null,null);
         db.close();
 //        db.setTransactionSuccessful();
 
@@ -57,13 +60,13 @@ public class DbUtil {
     public String getImg(){
         String con="";
         db=dbHelper.getWritableDatabase();
-        Cursor cursor = db.query(dbHelper.TABLE_NAME1,new String[]{"Id","Info"},null,null,null,null,"Id","1");
+        Cursor cursor = db.query(DbHelper.TABLE_NAME_IMAGE,new String[]{"Id","Info"},null,null,null,null,"Id","1");
         if(cursor.getCount()>0) {
             if (cursor.moveToFirst()) {
                 con = cursor.getString(1);
             }
 //        db.beginTransaction();
-            db.delete(dbHelper.TABLE_NAME1, "Id=?", new String[]{String.valueOf(cursor.getInt(0))});
+            db.delete(DbHelper.TABLE_NAME_IMAGE, "Id=?", new String[]{String.valueOf(cursor.getInt(0))});
         }
         db.close();
 //        db.setTransactionSuccessful();
@@ -80,7 +83,7 @@ public class DbUtil {
         values.put("Value",value);
         db=dbHelper.getWritableDatabase();
 //        db.beginTransaction();
-        db.update(dbHelper.TABLE_NAME2,values,"Key=?",new String[]{key});
+        db.update(DbHelper.TABLE_NAME_Info,values,"Key=?",new String[]{key});
         db.close();
 //        db.setTransactionSuccessful();
     }
@@ -93,7 +96,7 @@ public class DbUtil {
     public String getInfo(String key){
         String con="";
         db=dbHelper.getWritableDatabase();
-        Cursor cursor = db.query(dbHelper.TABLE_NAME2,new String[]{"Value"},"Key=?",new String[]{key},null,null,null);
+        Cursor cursor = db.query(DbHelper.TABLE_NAME_Info,new String[]{"Value"},"Key=?",new String[]{key},null,null,null);
         if(cursor.moveToFirst()){
             con=cursor.getString(0);
         }

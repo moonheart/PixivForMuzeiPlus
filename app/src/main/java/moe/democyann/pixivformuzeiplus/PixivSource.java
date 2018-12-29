@@ -61,12 +61,31 @@ public class PixivSource extends RemoteMuzeiArtSource {
      */
     private long lasttime = 0;
 
+    @Override
+    public void onCreate() {
+        Log.d(TAG, "onCreate");
+        super.onCreate();
+        setUserCommands(BUILTIN_COMMAND_ID_NEXT_ARTWORK);
+        conf = new ConfigManger(this);
+        pixivtop = new PixivTop50(this, getDir());
+        pixivUser = new PixivUser(this, getDir());
+        pixivLike = new PixivLike(this, getDir());
+        db = new DbUtil(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             loadflag = true;
 
-            Artwork a = null;
+            Artwork artwork = null;
             while (true) {
 
                 error = "";
@@ -75,7 +94,7 @@ public class PixivSource extends RemoteMuzeiArtSource {
                 //每日TOP50模式
                 if (method == 0) {
                     try {
-                        a = pixivtop.getArtwork();
+                        artwork = pixivtop.getArtwork();
                     } catch (Exception e) {
                         error = pixivtop.getError();
                         e.printStackTrace();
@@ -83,14 +102,14 @@ public class PixivSource extends RemoteMuzeiArtSource {
                 } else if (method == 1) {
                     //用户推荐模式
                     try {
-                        a = pixivUser.getArtwork();
+                        artwork = pixivUser.getArtwork();
                     } catch (Exception e) {
                         Log.i(TAG, "run: ERROR get User ArtWork");
                         error = pixivUser.getError();
                         Log.i(TAG, "run: ERROR !" + error);
                         e.printStackTrace();
                         try {
-                            a = pixivtop.getArtwork();
+                            artwork = pixivtop.getArtwork();
                         } catch (Exception er) {
                             er.printStackTrace();
                             error += "," + pixivtop.getError();
@@ -100,14 +119,14 @@ public class PixivSource extends RemoteMuzeiArtSource {
                 } else {
                     //收藏夹模式
                     try {
-                        a = pixivLike.getArtwork();
+                        artwork = pixivLike.getArtwork();
                     } catch (Exception e) {
                         Log.i(TAG, "run: ERROR get Like ArtWork");
                         error = pixivLike.getError();
                         Log.i(TAG, "run: ERROR !" + error);
                         e.printStackTrace();
                         try {
-                            a = pixivtop.getArtwork();
+                            artwork = pixivtop.getArtwork();
                         } catch (Exception er) {
                             er.printStackTrace();
                             error += "," + pixivtop.getError();
@@ -115,9 +134,9 @@ public class PixivSource extends RemoteMuzeiArtSource {
                     }
                 }
                 int i = 0;
-                if (a != null) {
+                if (artwork != null) {
                     try {
-                        i = db.insertImg(a.toJson().toString());
+                        i = db.insertImg(artwork.toJson().toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -153,16 +172,6 @@ public class PixivSource extends RemoteMuzeiArtSource {
         super(SOURCE_NAME);
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        setUserCommands(BUILTIN_COMMAND_ID_NEXT_ARTWORK);
-        conf = new ConfigManger(this);
-        pixivtop = new PixivTop50(this, getDir());
-        pixivUser = new PixivUser(this, getDir());
-        pixivLike = new PixivLike(this, getDir());
-        db = new DbUtil(this);
-    }
 
     @Override
     protected void onTryUpdate(int reason) throws RetryException {
@@ -209,12 +218,7 @@ public class PixivSource extends RemoteMuzeiArtSource {
             e.printStackTrace();
         }
         if (o != null) {
-            try {
-                artwork = Artwork.fromJson(o);
-            } catch (JSONException e) {
-                e.printStackTrace();
-
-            }
+            artwork = Artwork.fromJson(o);
         }
 
         //进程未启动时则获取新图片
@@ -258,17 +262,17 @@ public class PixivSource extends RemoteMuzeiArtSource {
     private File getDir() {
 
         String savePath = "/pixiv/";
-                // 创建外置缓存文件夹
-                File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
-                if (pPath.exists()) {
-                    if (pPath.isFile()) {
-                        pPath.delete();
-                        pPath.mkdir();
-                    }
-                } else {
-                    pPath.mkdir();
-                }
-                return pPath;
+        // 创建外置缓存文件夹
+        File pPath = new File(Environment.getExternalStorageDirectory() + savePath);
+        if (pPath.exists()) {
+            if (pPath.isFile()) {
+                pPath.delete();
+                pPath.mkdir();
+            }
+        } else {
+            pPath.mkdir();
+        }
+        return pPath;
     }
 
 

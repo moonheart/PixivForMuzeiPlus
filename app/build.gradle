@@ -1,15 +1,50 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+dependencies {
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
+    implementation 'org.jsoup:jsoup:1.10.3'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.google.android.apps.muzei:muzei-api:+"
+    implementation "com.android.volley:volley:+"
+    api 'com.google.guava:guava:27.0.1-android'
+    implementation 'com.google.code.gson:gson:2.8.0'
+
+    implementation 'com.android.support:multidex:1.0.3'
+
+
+
+//    implementation "androidx.core:core-ktx:$coreVersion"
+    implementation "android.arch.work:work-runtime-ktx:$workManagerVersion"
+
+    implementation "android.arch.persistence.room:rxjava2:$archVersion"
+    implementation "android.arch.persistence.room:runtime:$archVersion"
+    kapt "android.arch.persistence.room:compiler:$archVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$archVersion"
+}
+
+
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "moe.democyann.pixivformuzeiplus"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 11
         versionName "1.2.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -19,13 +54,6 @@ android {
     }
 }
 
-dependencies {
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    androidTestImplementation 'junit:junit:4.12'
-    implementation 'com.google.android.apps.muzei:muzei-api:3.+'
-    implementation 'org.jsoup:jsoup:1.10.3'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+repositories {
+    mavenCentral()
 }

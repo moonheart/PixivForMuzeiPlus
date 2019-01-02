@@ -25,7 +25,7 @@
     </string-array>
 
     <string-array name="method_string">
-        <item>デイリー Top50</item>
+        <item>ランキング</item>
         <item>おすすめ (ログイン必須)</item>
         <item>ブックマーク (ログイン必須)</item>
     </string-array>

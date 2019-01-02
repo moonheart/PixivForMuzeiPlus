@@ -26,7 +26,7 @@
     </string-array>
 
     <string-array name="method_string">
-        <item>每日 Top50</item>
+        <item>排行榜</item>
         <item>猜你喜欢 (需登录)</item>
         <item>收藏夹 (需登录)</item>
     </string-array>

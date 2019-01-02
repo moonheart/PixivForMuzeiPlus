@@ -25,8 +25,44 @@
         <item>4320</item>
     </string-array>
 
+    <string-array name="ranking_mode_entryValues">
+        <item>daily</item>
+        <item>weekly</item>
+        <item>monthly</item>
+        <item>rookie</item>
+        <item>original</item>
+        <item>male</item>
+        <item>female</item>
+        <item>daily_r18</item>
+        <item>weekly_r18</item>
+        <item>male_r18</item>
+        <item>female_r18</item>
+    </string-array>
+
+    <string-array name="ranking_mode_entries">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Rookie</item>
+        <item>Original</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Daily_r18</item>
+        <item>Weekly_r18</item>
+        <item>Male_r18</item>
+        <item>Female_r18</item>
+    </string-array>
+
+    <string-array name="ranking_mode_count">
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+
     <string-array name="method_string">
-        <item>Pixiv Daily Top50</item>
+        <item>Pixiv Ranking</item>
         <item>Recommended For You (Login Required)</item>
         <item>Your Bookmarks (Login Required)</item>
     </string-array>

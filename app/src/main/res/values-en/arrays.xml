@@ -25,7 +25,7 @@
     </string-array>
 
     <string-array name="method_string">
-        <item>Pixiv Daily Top50</item>
+        <item>Pixiv Ranking</item>
         <item>Recommended For You (Login Required)</item>
         <item>Your Bookmarks (Login Required)</item>
     </string-array>

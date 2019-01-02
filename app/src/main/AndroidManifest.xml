@@ -17,22 +17,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service
-            android:name=".PixivSource"
-            android:description="@string/source_description"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="com.google.android.apps.muzei.api.MuzeiArtSource" />
-            </intent-filter>
-
-            <meta-data
-                android:name="color"
-                android:value="#fa0" />
-            <meta-data
-                android:name="settingsActivity"
-                android:value="moe.democyann.pixivformuzeiplus.settings.Setting" />
-        </service>
 
         <activity
             android:name=".settings.Setting"
@@ -41,13 +25,33 @@
             android:label="@string/app_name" />
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="moe.democyann.pixivformuzeiplus.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
+        </provider>
+
+        <provider
+            android:name="moe.democyann.pixivformuzeiplus.PixivProvider"
+            android:authorities="moe.democyann.pixivformuzeiplus"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:description="@string/source_description"
+            android:exported="true"
+            android:permission="com.google.android.apps.muzei.api.ACCESS_PROVIDER">
+            <intent-filter>
+                <action android:name="com.google.android.apps.muzei.api.MuzeiArtProvider"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="color"
+                android:value="#fa0" />
+            <meta-data
+                android:name="settingsActivity"
+                android:value="moe.democyann.pixivformuzeiplus.settings.Setting" />
         </provider>
 
         <activity android:name=".activity.MainActivity">

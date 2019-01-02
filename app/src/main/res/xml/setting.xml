@@ -43,7 +43,23 @@
             android:entryValues="@array/method_values"
             android:defaultValue="0"
             android:dialogTitle="@string/method_title"
-
+            />
+        <ListPreference
+            android:key="ranking_mode"
+            android:title="@string/ranking_mode"
+            android:summary="@string/ranking_mode_des"
+            android:entries="@array/ranking_mode_entries"
+            android:entryValues="@array/ranking_mode_entryValues"
+            android:defaultValue="daily"
+            android:dialogTitle="@string/ranking_mode"
+            />
+        <ListPreference
+            android:key="ranking_mode_count"
+            android:title="Top Count"
+            android:summary="Ranking Mode Top Count"
+            android:entries="@array/ranking_mode_count"
+            android:entryValues="@array/ranking_mode_count"
+            android:defaultValue="50"
             />
         <CheckBoxPreference
             android:key="is_tag"

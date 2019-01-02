@@ -14,6 +14,9 @@
     <string name="set_pixiv_pass">Password</string>
     <string name="input_pixiv_pass">Inpur Your Pixiv Password</string>
     <string name="u_err">** Please Set Up Pixiv ID and Password **</string>
+    <string name="ranking_mode" translatable="false">Ranking Mode</string>
+    <string name="ranking_mode_des" translatable="false">Please Choose Ranking Mode</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

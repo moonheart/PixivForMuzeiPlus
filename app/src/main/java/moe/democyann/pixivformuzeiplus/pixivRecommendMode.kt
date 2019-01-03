@@ -36,7 +36,7 @@ class PixivRecommendMode(val context: Context) : PixivService(context) {
             val list = mutableListOf<PixivImage>()
             val recommenderlist = recommenderResponse.recommendations.shuffled().take(5)
             for (item in recommenderlist) {
-                val image = getInfoFromMobilePage(item)
+                val image = PixivImageInfoResolver(context).Resolve(item)
                 if (image != null)
                     list.add(image)
             }
@@ -49,7 +49,7 @@ class PixivRecommendMode(val context: Context) : PixivService(context) {
         val lastupdate = db.infoDao().getStringByKey("lastupdate_recommenderjson")
         var recommenderjson = db.infoDao().getStringByKey("recommenderjson")
         if (lastupdate.isNullOrEmpty() // 上次更新时间未设置
-                || lastupdate.toLong() + HOUR < System.currentTimeMillis() // 距离上次更新时间超过阈值
+                || lastupdate.toLong() + Constants.Time.HOUR < System.currentTimeMillis() // 距离上次更新时间超过阈值
                 || recommenderjson.isNullOrEmpty() // 缓存在数据库中的JSON没有值
         ) {
             Log.d(TAG, "从网络获取 recommenderjson")

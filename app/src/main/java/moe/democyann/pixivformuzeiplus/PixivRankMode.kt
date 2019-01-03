@@ -11,7 +11,7 @@ import java.lang.Exception
 import java.util.*
 
 
-class PixivRankMode(context: Context) : PixivService(context) {
+class PixivRankMode(val context: Context) : PixivService(context) {
     private val TAG = "PixivRankMode"
 
     val URL_RANKING = "https://www.pixiv.net/ranking.php?mode=%s&format=json"
@@ -35,7 +35,7 @@ class PixivRankMode(context: Context) : PixivService(context) {
                 val contents = rankingResult.contents.take(configManger.ranking_mode_count).shuffled().take(5)
                 for (content in contents) {
                     Log.d(TAG, "prepare for ${content.illustId}")
-                    val image = getInfoFromMobilePage(content.illustId.toString())
+                    val image = PixivImageInfoResolver(context).Resolve(content.illustId.toString())
                     if (image != null)
                         list.add(image)
                 }
@@ -44,7 +44,7 @@ class PixivRankMode(context: Context) : PixivService(context) {
 
         } catch (e: JsonSyntaxException) {
             Log.d(TAG, "解析Json出错")
-            writeLongLog(body!!)
+            LogHelper.writeLongLog(TAG, body!!)
             e.printStackTrace()
         }
         return emptyList()
@@ -55,7 +55,7 @@ class PixivRankMode(context: Context) : PixivService(context) {
         val lastupdate = db.infoDao().getStringByKey("lastupdate_rankinglistjson_$mode")
         var rankinglistjson = db.infoDao().getStringByKey("rankinglistjson_$mode")
         if (lastupdate.isNullOrEmpty() // 上次更新时间未设置
-                || lastupdate.toLong() + HOUR < System.currentTimeMillis() // 距离上次更新时间超过阈值
+                || lastupdate.toLong() + Constants.Time.HOUR < System.currentTimeMillis() // 距离上次更新时间超过阈值
                 || rankinglistjson.isNullOrEmpty() // 缓存在数据库中的JSON没有值
         ) {
             Log.d(TAG, "从网络获取 rankinglistjson_$mode")
